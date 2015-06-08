@@ -320,31 +320,31 @@ void JacoArm::publishJointAngles(void)
     jaco_comm_.getJointAngles(current_angles);
     jaco_msgs::JointAngles jaco_angles = current_angles.constructAnglesMsg();
 
+
+    sensor_msgs::JointState joint_state;
+    joint_state.name = joint_names_;
+    joint_state.header.stamp = ros::Time::now();
+
     jaco_angles.joint1 = current_angles.Actuator1;
     jaco_angles.joint2 = current_angles.Actuator2;
     jaco_angles.joint3 = current_angles.Actuator3;
     jaco_angles.joint4 = current_angles.Actuator4;
     jaco_angles.joint5 = current_angles.Actuator5;
     jaco_angles.joint6 = current_angles.Actuator6;
-
-    sensor_msgs::JointState joint_state;
-    joint_state.name = joint_names_;
-    joint_state.header.stamp = ros::Time::now();
-
-    // Transform from Kinova DH algorithm to physical angles in radians, then place into vector array
+    
+    // Transform from physical angles to Kinova DH algorithm in radians , then place into vector array
     joint_state.position.resize(9);
 
-    double j6o = jaco_comm_.robotType() == 2 ? 270.0 : 260.0;
-    joint_state.position[0] = (180- jaco_angles.joint1) * (PI / 180);
-    joint_state.position[1] = (jaco_angles.joint2 - j6o) * (PI / 180);
-    joint_state.position[2] = (90-jaco_angles.joint3) * (PI / 180);
-    joint_state.position[3] = (180-jaco_angles.joint4) * (PI / 180);
-    joint_state.position[4] = (180-jaco_angles.joint5) * (PI / 180);
-    joint_state.position[5] = (270-jaco_angles.joint6) * (PI / 180);
+    joint_state.position[0] = ( 180.0 - jaco_angles.joint1) * (PI / 180.0);
+    joint_state.position[1] = (jaco_angles.joint2 - 270.0) * (PI / 180.0);
+    joint_state.position[2] = (jaco_angles.joint3 - 90.0) * (PI / 180.0);
+    joint_state.position[3] = (jaco_angles.joint4 - 180.0 ) * (PI / 180.0);
+    joint_state.position[4] = (jaco_angles.joint5 - 180.0) * (PI / 180.0);
+    joint_state.position[5] = (jaco_angles.joint6 - 270.0) * (PI / 180.0);
     joint_state.position[6] = finger_conv_ratio_ * fingers.Finger1;
     joint_state.position[7] = finger_conv_ratio_ * fingers.Finger2;
     joint_state.position[8] = finger_conv_ratio_ * fingers.Finger3;
-
+   
     // Joint velocities
     JacoAngles current_vels;
     jaco_comm_.getJointVelocities(current_vels);
